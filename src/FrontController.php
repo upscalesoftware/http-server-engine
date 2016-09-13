@@ -47,7 +47,6 @@ class FrontController
                 $vars = $routeInfo[2];
                 $actionInstance = new $actionClass();
                 if ($actionInstance instanceof Controller\ActionInterface) {
-                    $response = $response->withStatus(200);
                     $response = $actionInstance->execute($request, $response, $vars);
                 }
                 break;

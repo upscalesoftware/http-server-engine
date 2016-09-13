@@ -19,9 +19,7 @@ $dispatcher = createSimpleDispatcher(function (RouteCollector $r) {
     }
 });
 
-$defaultResponse = new Response('php://memory', 400);
-
 $frontController = new FrontController($dispatcher);
 
-$server = new Server([$frontController, 'dispatch'], $request, $defaultResponse);
+$server = new Server([$frontController, 'dispatch'], $request, new Response());
 $server->listen();
