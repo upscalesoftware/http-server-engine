@@ -1,6 +1,7 @@
 <?php
 namespace Upscale\Solvent;
 
+use Aura\Di\Container;
 use FastRoute\Dispatcher;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -13,13 +14,20 @@ class FrontController
     protected $dispatcher;
 
     /**
+     * @var Container
+     */
+    protected $di;
+
+    /**
      * Inject dependencies
      *
      * @param Dispatcher $dispatcher
+     * @param Container $di
      */
-    public function __construct(Dispatcher $dispatcher)
+    public function __construct(Dispatcher $dispatcher, Container $di)
     {
         $this->dispatcher = $dispatcher;
+        $this->di = $di;
     }
 
     /**
@@ -45,9 +53,9 @@ class FrontController
             case Dispatcher::FOUND:
                 $actionClass = $routeInfo[1];
                 $vars = $routeInfo[2];
-                $actionInstance = new $actionClass();
+                $actionInstance = $this->di->newInstance($actionClass, $vars);
                 if ($actionInstance instanceof Controller\ActionInterface) {
-                    $response = $actionInstance->execute($request, $response, $vars);
+                    $response = $actionInstance->execute($response);
                 }
                 break;
         }
