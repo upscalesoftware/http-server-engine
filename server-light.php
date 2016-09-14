@@ -1,4 +1,7 @@
 <?php
+/**
+ * Entry point with lightweight bootstrap, but considerable amount of code in the entry point
+ */
 namespace Upscale\Solvent;
 
 use Aura\Di\ContainerBuilder;
