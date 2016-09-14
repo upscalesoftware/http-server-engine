@@ -35,4 +35,15 @@ class RouteCollector
             $list->addRoute($verb, $route, $handler);
         }
     }
+
+    /**
+     * Shorthand to pass instance directly in place of callable arguments, including lazy injection via DI
+     *
+     * @param RouteCollection $list
+     * @return void
+     */
+    public function __invoke(RouteCollection $list)
+    {
+        $this->collect($list);
+    }
 }

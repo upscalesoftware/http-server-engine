@@ -61,4 +61,16 @@ class FrontController
         }
         return $response;
     }
+
+    /**
+     * Shorthand to pass instance directly in place of callable arguments, including lazy injection via DI
+     *
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     */
+    public function __invoke(ServerRequestInterface $request, ResponseInterface $response)
+    {
+        return $this->dispatch($request, $response);
+    }
 }
