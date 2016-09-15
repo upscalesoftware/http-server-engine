@@ -1,5 +1,5 @@
 <?php
-namespace Upscale\HttpServerEngine\Controller;
+namespace Upscale\HttpServerEngine;
 
 use Psr\Http\Message\ResponseInterface;
 

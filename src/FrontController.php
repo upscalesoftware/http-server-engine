@@ -31,7 +31,7 @@ class FrontController
     }
 
     /**
-     * Delegate request handling to the respective controller action and return its execution result
+     * Delegate request handling to the respective action and return its execution result
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
@@ -54,7 +54,7 @@ class FrontController
                 $actionClass = $routeInfo[1];
                 $vars = $routeInfo[2];
                 $actionInstance = $this->di->newInstance($actionClass, $vars);
-                if ($actionInstance instanceof Controller\ActionInterface) {
+                if ($actionInstance instanceof ActionInterface) {
                     $response = $actionInstance->execute($response);
                 }
                 break;
