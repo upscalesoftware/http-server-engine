@@ -1,5 +1,5 @@
 <?php
-namespace Upscale\Solvent;
+namespace Upscale\HttpServerEngine;
 
 use Aura\Di\Container;
 use FastRoute\Dispatcher;

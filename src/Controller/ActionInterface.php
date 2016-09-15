@@ -1,5 +1,5 @@
 <?php
-namespace Upscale\Solvent\Controller;
+namespace Upscale\HttpServerEngine\Controller;
 
 use Psr\Http\Message\ResponseInterface;
 

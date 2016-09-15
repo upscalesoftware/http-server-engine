@@ -7,7 +7,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Upscale\\Solvent\\": "src/"
+            "Upscale\\HttpServerEngine\\": "src/"
         }
     }
 }

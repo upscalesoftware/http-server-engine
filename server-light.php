@@ -2,7 +2,7 @@
 /**
  * Entry point with lightweight bootstrap, but considerable amount of code in the entry point
  */
-namespace Upscale\Solvent;
+namespace Upscale\HttpServerEngine;
 
 use Aura\Di\Container;
 use Aura\Di\ContainerBuilder;

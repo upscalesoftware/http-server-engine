@@ -2,7 +2,7 @@
 /**
  * Entry point with full-blown DI bootstrap and minimal amount of code in the entry point
  */
-namespace Upscale\Solvent;
+namespace Upscale\HttpServerEngine;
 
 use Aura\Di\ContainerBuilder;
 use Zend\Diactoros\Server;

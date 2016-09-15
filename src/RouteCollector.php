@@ -1,5 +1,5 @@
 <?php
-namespace Upscale\Solvent;
+namespace Upscale\HttpServerEngine;
 
 use FastRoute\Dispatcher;
 use FastRoute\RouteCollector as RouteCollection;
