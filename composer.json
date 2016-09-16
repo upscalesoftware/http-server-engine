@@ -1,6 +1,6 @@
 {
     "name": "upscale/http-server-engine",
-    "description": "Wiring of Zend Diactoros, FastRoute, Aura.Di libraries for HTTP / RESTful API server",
+    "description": "Wiring of Zend Diactoros, FastRoute, and Aura.Di for RESTful API",
     "type": "library",
     "version": "1.0.0",
     "keywords": [
@@ -10,14 +10,14 @@
         "RESTful API",
         "RESTful web service",
         "HTTP message",
-        "PSR-7 message",
+        "PSR-7",
         "Zend Diactoros",
         "routing",
         "router",
         "FastRoute",
-        "Aura.Di",
         "dependency injection",
         "DI container",
+        "Aura.Di",
         "lightweight"
     ],
     "license": "Apache-2.0",
