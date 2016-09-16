@@ -1,3 +1,5 @@
+[![Build Status](https://api.travis-ci.org/upscalesoftware/http-server-engine.svg?branch=master)](https://travis-ci.org/upscalesoftware/http-server-engine)
+
 HTTP Server Engine for RESTful API
 ==================================
 
