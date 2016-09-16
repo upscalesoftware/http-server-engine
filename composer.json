@@ -2,7 +2,7 @@
     "name": "upscale/http-server-engine",
     "description": "Wiring of Zend Diactoros, FastRoute, and Aura.Di for RESTful API",
     "type": "library",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "keywords": [
         "HTTP server",
         "REST server",
