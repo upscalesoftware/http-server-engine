@@ -19,15 +19,33 @@ class FrontController
     protected $di;
 
     /**
+     * @var string
+     */
+    protected $routeErrorHandler;
+
+    /**
+     * @var string
+     */
+    protected $methodErrorHandler;
+
+    /**
      * Inject dependencies
      *
      * @param Dispatcher $dispatcher
      * @param Container $di
+     * @param string $routeErrorHandler Class to handle not found resources
+     * @param string $methodErrorHandler Class to handle not allowed methods
      */
-    public function __construct(Dispatcher $dispatcher, Container $di)
-    {
+    public function __construct(
+        Dispatcher $dispatcher,
+        Container $di,
+        $routeErrorHandler,
+        $methodErrorHandler
+    ) {
         $this->dispatcher = $dispatcher;
         $this->di = $di;
+        $this->routeErrorHandler = $routeErrorHandler;
+        $this->methodErrorHandler = $methodErrorHandler;
     }
 
     /**
@@ -42,22 +60,25 @@ class FrontController
         $routeInfo = $this->dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
         switch ($routeInfo[0]) {
             case Dispatcher::NOT_FOUND:
-                $response = $response->withStatus(404);
+                $handlerClass = $this->routeErrorHandler;
+                $handlerArgs = [];
                 break;
 
             case Dispatcher::METHOD_NOT_ALLOWED:
                 $allowedMethods = $routeInfo[1];
-                $response = $response->withStatus(405)->withHeader('Allow', implode(', ', $allowedMethods));
+                $handlerClass = $this->methodErrorHandler;
+                $handlerArgs = ['allowedMethods' => $allowedMethods];
                 break;
 
             case Dispatcher::FOUND:
-                $actionClass = $routeInfo[1];
-                $vars = $routeInfo[2];
-                $actionInstance = $this->di->newInstance($actionClass, $vars);
-                if ($actionInstance instanceof ActionInterface) {
-                    $response = $actionInstance->execute($response);
-                }
+            default:
+                $handlerClass = $routeInfo[1];
+                $handlerArgs = $routeInfo[2];
                 break;
+        }
+        $handler = $this->di->newInstance($handlerClass, $handlerArgs);
+        if ($handler instanceof ActionInterface) {
+            $response = $handler->execute($response);
         }
         return $response;
     }

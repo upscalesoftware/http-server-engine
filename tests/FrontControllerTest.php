@@ -33,6 +33,11 @@ class FrontControllerTest extends TestCase
      */
     private $request;
 
+    /**
+     * @var ActionInterface|MockObject
+     */
+    private $handler;
+
     protected function setUp()
     {
         $uri = $this->createMock(UriInterface::class);
@@ -43,9 +48,17 @@ class FrontControllerTest extends TestCase
         $this->request->expects($this->once())->method('getUri')->willReturn($uri);
 
         $this->dispatcher = $this->createMock(Dispatcher::class);
+
+        $this->handler = $this->createMock(ActionInterface::class);
+
         $this->di = $this->createMock(Container::class);
 
-        $this->subject = new FrontController($this->dispatcher, $this->di);
+        $this->subject = new FrontController(
+            $this->dispatcher,
+            $this->di,
+            'route_error_handler',
+            'method_error_handler'
+        );
     }
 
     /**
@@ -57,7 +70,8 @@ class FrontControllerTest extends TestCase
         $expectedResult = $this->createMock(ResponseInterface::class);
 
         $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('withStatus')->with(404)->willReturn($expectedResult);
+        $response->expects($this->never())->method('withStatus');
+        $response->expects($this->never())->method('withHeader');
 
         $this->dispatcher
             ->expects($this->once())
@@ -65,7 +79,13 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::NOT_FOUND]);
 
-        $this->di->expects($this->never())->method('newInstance');
+        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
+
+        $this->di
+            ->expects($this->once())
+            ->method('newInstance')
+            ->with('route_error_handler', [])
+            ->willReturn($this->handler);
 
         $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
 
@@ -80,11 +100,9 @@ class FrontControllerTest extends TestCase
     {
         $expectedResult = $this->createMock(ResponseInterface::class);
 
-        $partialResult = $this->createMock(ResponseInterface::class);
-        $partialResult->expects($this->once())->method('withHeader')->with('Allow', 'GET, POST')->willReturn($expectedResult);
-
         $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->once())->method('withStatus')->with(405)->willReturn($partialResult);
+        $response->expects($this->never())->method('withStatus');
+        $response->expects($this->never())->method('withHeader');
 
         $this->dispatcher
             ->expects($this->once())
@@ -92,7 +110,13 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::METHOD_NOT_ALLOWED, ['GET', 'POST']]);
 
-        $this->di->expects($this->never())->method('newInstance');
+        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
+
+        $this->di
+            ->expects($this->once())
+            ->method('newInstance')
+            ->with('method_error_handler', ['allowedMethods' => ['GET', 'POST']])
+            ->willReturn($this->handler);
 
         $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
 
@@ -144,14 +168,13 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::FOUND, 'fixture_action_type', ['param1' => 'value1', 'param2' => 'value2']]);
 
-        $action = $this->createMock(ActionInterface::class);
-        $action->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
+        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
 
         $this->di
             ->expects($this->once())
             ->method('newInstance')
             ->with('fixture_action_type', ['param1' => 'value1', 'param2' => 'value2'])
-            ->willReturn($action);
+            ->willReturn($this->handler);
 
         $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
 
