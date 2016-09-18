@@ -29,23 +29,31 @@ class FrontController
     protected $methodErrorHandler;
 
     /**
+     * @var string
+     */
+    protected $exceptionHandler;
+
+    /**
      * Inject dependencies
      *
      * @param Dispatcher $dispatcher
      * @param Container $di
      * @param string $routeErrorHandler Class to handle not found resources
      * @param string $methodErrorHandler Class to handle not allowed methods
+     * @param string $exceptionHandler Class to handle uncaught exceptions
      */
     public function __construct(
         Dispatcher $dispatcher,
         Container $di,
         $routeErrorHandler,
-        $methodErrorHandler
+        $methodErrorHandler,
+        $exceptionHandler
     ) {
         $this->dispatcher = $dispatcher;
         $this->di = $di;
         $this->routeErrorHandler = $routeErrorHandler;
         $this->methodErrorHandler = $methodErrorHandler;
+        $this->exceptionHandler = $exceptionHandler;
     }
 
     /**
@@ -76,11 +84,33 @@ class FrontController
                 $handlerArgs = $routeInfo[2];
                 break;
         }
-        $handler = $this->di->newInstance($handlerClass, $handlerArgs);
-        if ($handler instanceof ActionInterface) {
+        try {
+            $handler = $this->createHandler($handlerClass, $handlerArgs);
+            $response = $handler->execute($response);
+        } catch (\Exception $e) {
+            $handler = $this->createHandler($this->exceptionHandler, ['exception' => $e]);
             $response = $handler->execute($response);
         }
         return $response;
+    }
+
+    /**
+     * Return newly created handler instance instantiated with given constructor arguments
+     *
+     * @param string $class
+     * @param array $args
+     * @return ActionInterface
+     * @throws \UnexpectedValueException
+     */
+    protected function createHandler($class, array $args = [])
+    {
+        $result = $this->di->newInstance($class, $args);
+        if (!$result instanceof ActionInterface) {
+            throw new \UnexpectedValueException(sprintf(
+                'Class "%s" has to implement "%s".', get_class($result), ActionInterface::class
+            ));
+        }
+        return $result;
     }
 
     /**

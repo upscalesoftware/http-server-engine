@@ -10,6 +10,7 @@ interface ActionInterface
      *
      * @param ResponseInterface $response
      * @return ResponseInterface
+     * @throws \Exception
      */
     public function execute(ResponseInterface $response);
 }

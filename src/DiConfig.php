@@ -53,6 +53,7 @@ class DiConfig extends ContainerConfig
         $di->params[RouteCollector::class]['routesConfigFilename'] = $this->routesConfigFilename;
         $di->params[FrontController::class]['routeErrorHandler'] = ErrorHandler\ResourceNotFound::class;
         $di->params[FrontController::class]['methodErrorHandler'] = ErrorHandler\MethodNotAllowed::class;
+        $di->params[FrontController::class]['exceptionHandler'] = ErrorHandler\UncaughtException::class;
         $di->params[Server::class]['callback'] = $di->lazyGet('front_controller');
     }
 }

@@ -34,6 +34,16 @@ class FrontControllerTest extends TestCase
     private $request;
 
     /**
+     * @var ResponseInterface|MockObject
+     */
+    private $inputResponse;
+
+    /**
+     * @var ResponseInterface|MockObject
+     */
+    private $expectedResponse;
+
+    /**
      * @var ActionInterface|MockObject
      */
     private $handler;
@@ -47,9 +57,19 @@ class FrontControllerTest extends TestCase
         $this->request->expects($this->once())->method('getMethod')->willReturn('TEST');
         $this->request->expects($this->once())->method('getUri')->willReturn($uri);
 
-        $this->dispatcher = $this->createMock(Dispatcher::class);
+        $this->expectedResponse = $this->createMock(ResponseInterface::class);
+
+        $this->inputResponse = $this->createMock(ResponseInterface::class);
+        $this->inputResponse->expects($this->never())->method($this->anything());
 
         $this->handler = $this->createMock(ActionInterface::class);
+        $this->handler
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->inputResponse)
+            ->willReturn($this->expectedResponse);
+
+        $this->dispatcher = $this->createMock(Dispatcher::class);
 
         $this->di = $this->createMock(Container::class);
 
@@ -57,7 +77,8 @@ class FrontControllerTest extends TestCase
             $this->dispatcher,
             $this->di,
             'route_error_handler',
-            'method_error_handler'
+            'method_error_handler',
+            'exception_handler'
         );
     }
 
@@ -67,19 +88,11 @@ class FrontControllerTest extends TestCase
      */
     public function testDispatchNotFound($isMagicInvocation)
     {
-        $expectedResult = $this->createMock(ResponseInterface::class);
-
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->never())->method('withStatus');
-        $response->expects($this->never())->method('withHeader');
-
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::NOT_FOUND]);
-
-        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
 
         $this->di
             ->expects($this->once())
@@ -87,9 +100,9 @@ class FrontControllerTest extends TestCase
             ->with('route_error_handler', [])
             ->willReturn($this->handler);
 
-        $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
+        $actualResult = $this->invokeDispatch($this->subject, $this->inputResponse, $isMagicInvocation);
 
-        $this->assertSame($expectedResult, $actualResult);
+        $this->assertSame($this->expectedResponse, $actualResult);
     }
 
     /**
@@ -98,19 +111,11 @@ class FrontControllerTest extends TestCase
      */
     public function testDispatchMethodNotAllowed($isMagicInvocation)
     {
-        $expectedResult = $this->createMock(ResponseInterface::class);
-
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->never())->method('withStatus');
-        $response->expects($this->never())->method('withHeader');
-
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::METHOD_NOT_ALLOWED, ['GET', 'POST']]);
-
-        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
 
         $this->di
             ->expects($this->once())
@@ -118,9 +123,9 @@ class FrontControllerTest extends TestCase
             ->with('method_error_handler', ['allowedMethods' => ['GET', 'POST']])
             ->willReturn($this->handler);
 
-        $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
+        $actualResult = $this->invokeDispatch($this->subject, $this->inputResponse, $isMagicInvocation);
 
-        $this->assertSame($expectedResult, $actualResult);
+        $this->assertSame($this->expectedResponse, $actualResult);
     }
 
     /**
@@ -129,10 +134,6 @@ class FrontControllerTest extends TestCase
      */
     public function testDispatchFoundInvalidAction($isMagicInvocation)
     {
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->never())->method('withStatus');
-        $response->expects($this->never())->method('withHeader');
-
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
@@ -140,14 +141,24 @@ class FrontControllerTest extends TestCase
             ->willReturn([Dispatcher::FOUND, 'fixture_action_type', ['param1' => 'value1', 'param2' => 'value2']]);
 
         $this->di
-            ->expects($this->once())
+            ->expects($this->at(0))
             ->method('newInstance')
             ->with('fixture_action_type', ['param1' => 'value1', 'param2' => 'value2'])
             ->willReturn(new \stdClass());
 
-        $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
+        $this->di
+            ->expects($this->at(1))
+            ->method('newInstance')
+            ->with('exception_handler', $this->logicalAnd(
+                $this->arrayHasKey('exception'),
+                $this->countOf(1),
+                $this->containsOnlyInstancesOf(\UnexpectedValueException::class)
+            ))
+            ->willReturn($this->handler);
 
-        $this->assertSame($response, $actualResult);
+        $actualResult = $this->invokeDispatch($this->subject, $this->inputResponse, $isMagicInvocation);
+
+        $this->assertSame($this->expectedResponse, $actualResult);
     }
 
     /**
@@ -156,19 +167,11 @@ class FrontControllerTest extends TestCase
      */
     public function testDispatchFoundValidAction($isMagicInvocation)
     {
-        $expectedResult = $this->createMock(ResponseInterface::class);
-
-        $response = $this->createMock(ResponseInterface::class);
-        $response->expects($this->never())->method('withStatus');
-        $response->expects($this->never())->method('withHeader');
-
         $this->dispatcher
             ->expects($this->once())
             ->method('dispatch')
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::FOUND, 'fixture_action_type', ['param1' => 'value1', 'param2' => 'value2']]);
-
-        $this->handler->expects($this->once())->method('execute')->with($response)->willReturn($expectedResult);
 
         $this->di
             ->expects($this->once())
@@ -176,9 +179,9 @@ class FrontControllerTest extends TestCase
             ->with('fixture_action_type', ['param1' => 'value1', 'param2' => 'value2'])
             ->willReturn($this->handler);
 
-        $actualResult = $this->invokeDispatch($this->subject, $response, $isMagicInvocation);
+        $actualResult = $this->invokeDispatch($this->subject, $this->inputResponse, $isMagicInvocation);
 
-        $this->assertSame($expectedResult, $actualResult);
+        $this->assertSame($this->expectedResponse, $actualResult);
     }
 
     public function dispatchDataProvider()
