@@ -40,6 +40,7 @@ class DiConfig extends ContainerConfig
         // Define shared services
         $di->set('request', $di->lazy([ServerRequestFactory::class, 'fromGlobals'], $_SERVER + $_ENV));
         $di->set('route_collector', $di->lazyNew(RouteCollector::class));
+        $di->set('action_factory', $di->lazyNew(ActionFactory::class));
         $di->set('front_controller', $di->lazyNew(FrontController::class));
 
         // Define interface preferences
@@ -47,6 +48,7 @@ class DiConfig extends ContainerConfig
         $di->types[ContainerInterface::class] = $di;
         $di->types[ResponseInterface::class] = $di->lazyNew(Response::class);
         $di->types[ServerRequestInterface::class] = $di->lazyGet('request');
+        $di->types[ActionFactory::class] = $di->lazyGet('action_factory');
         $di->types[Dispatcher::class] = $di->lazy('\FastRoute\simpleDispatcher', $di->lazyGet('route_collector'));
 
         // Define non-injectable arguments
