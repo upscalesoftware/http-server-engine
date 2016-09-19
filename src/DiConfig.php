@@ -21,7 +21,7 @@ class DiConfig extends ContainerConfig
     /**
      * Inject dependencies
      *
-     * @param $routesConfigFilename
+     * @param string $routesConfigFilename
      */
     public function __construct($routesConfigFilename)
     {
