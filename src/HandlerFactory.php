@@ -3,7 +3,7 @@ namespace Upscale\HttpServerEngine;
 
 use Aura\Di\Container;
 
-class ActionFactory
+class HandlerFactory
 {
     /**
      * @var Container
@@ -21,17 +21,19 @@ class ActionFactory
     }
 
     /**
+     * Return newly created handler instantiated with given constructor arguments
+     *
      * @param string $class
      * @param array $args
-     * @return ActionInterface
+     * @return HandlerInterface
      * @throws \UnexpectedValueException
      */
     public function create($class, array $args = [])
     {
         $result = $this->di->newInstance($class, $args);
-        if (!$result instanceof ActionInterface) {
+        if (!$result instanceof HandlerInterface) {
             throw new \UnexpectedValueException(sprintf(
-                'Class "%s" has to implement "%s".', get_class($result), ActionInterface::class
+                'Class "%s" has to implement "%s".', get_class($result), HandlerInterface::class
             ));
         }
         return $result;

@@ -5,17 +5,13 @@ use Aura\Di\Container;
 use PHPUnit_Framework_TestCase as TestCase;
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 use FastRoute\Dispatcher;
-use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\UriInterface;
-use Upscale\HttpServerEngine\ActionFactory;
-use Upscale\HttpServerEngine\ActionInterface;
-use Upscale\HttpServerEngine\FrontController;
+use Upscale\HttpServerEngine\HandlerFactory;
+use Upscale\HttpServerEngine\HandlerInterface;
 
-class ActionFactoryTest extends TestCase
+class HandlerFactoryTest extends TestCase
 {
     /**
-     * @var ActionFactory
+     * @var HandlerFactory
      */
     private $subject;
 
@@ -28,7 +24,7 @@ class ActionFactoryTest extends TestCase
     {
         $this->di = $this->createMock(Container::class);
 
-        $this->subject = new ActionFactory($this->di);
+        $this->subject = new HandlerFactory($this->di);
     }
 
     /**
@@ -56,14 +52,14 @@ class ActionFactoryTest extends TestCase
             [
                 'FixtureActionClass',
                 ['param1' => 'value1', 'param2' => 'value2'],
-                $this->createMock(ActionInterface::class),
+                $this->createMock(HandlerInterface::class),
             ],
         ];
     }
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessage Class "stdClass" has to implement "Upscale\HttpServerEngine\ActionInterface"
+     * @expectedExceptionMessage Class "stdClass" has to implement "Upscale\HttpServerEngine\HandlerInterface"
      */
     public function testCreateException()
     {

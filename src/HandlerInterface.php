@@ -3,10 +3,10 @@ namespace Upscale\HttpServerEngine;
 
 use Psr\Http\Message\ResponseInterface;
 
-interface ActionInterface
+interface HandlerInterface
 {
     /**
-     * Execute response preparation action
+     * Perform response preparation and return its revised instance
      *
      * @param ResponseInterface $response
      * @return ResponseInterface

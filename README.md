@@ -18,7 +18,7 @@ It defines the project structure, router configuration, and the entry point that
 Speed and minimalism are the objectives of the project. It comes with very little source code.
 
 Total overheard of the engine is ~4 ms (0.004 sec) measured on a laptop.
-The estimates are based on execution of an empty action dispatched out of 100 declared routes.
+The estimates are based on execution of an empty handler dispatched among 100 declared routes.
 
 
 ## License

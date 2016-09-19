@@ -7,8 +7,8 @@ use FastRoute\Dispatcher;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
-use Upscale\HttpServerEngine\ActionFactory;
-use Upscale\HttpServerEngine\ActionInterface;
+use Upscale\HttpServerEngine\HandlerFactory;
+use Upscale\HttpServerEngine\HandlerInterface;
 use Upscale\HttpServerEngine\FrontController;
 
 class FrontControllerTest extends TestCase
@@ -24,9 +24,9 @@ class FrontControllerTest extends TestCase
     private $dispatcher;
 
     /**
-     * @var ActionFactory|MockObject
+     * @var HandlerFactory|MockObject
      */
-    private $actionFactory;
+    private $handlerFactory;
 
     /**
      * @var ServerRequestInterface|MockObject
@@ -44,7 +44,7 @@ class FrontControllerTest extends TestCase
     private $expectedResponse;
 
     /**
-     * @var ActionInterface|MockObject
+     * @var HandlerInterface|MockObject
      */
     private $handler;
 
@@ -62,7 +62,7 @@ class FrontControllerTest extends TestCase
         $this->inputResponse = $this->createMock(ResponseInterface::class);
         $this->inputResponse->expects($this->never())->method($this->anything());
 
-        $this->handler = $this->createMock(ActionInterface::class);
+        $this->handler = $this->createMock(HandlerInterface::class);
         $this->handler
             ->expects($this->once())
             ->method('execute')
@@ -71,11 +71,11 @@ class FrontControllerTest extends TestCase
 
         $this->dispatcher = $this->createMock(Dispatcher::class);
 
-        $this->actionFactory = $this->createMock(ActionFactory::class);
+        $this->handlerFactory = $this->createMock(HandlerFactory::class);
 
         $this->subject = new FrontController(
             $this->dispatcher,
-            $this->actionFactory,
+            $this->handlerFactory,
             'route_error_handler',
             'method_error_handler',
             'exception_handler'
@@ -94,7 +94,7 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::NOT_FOUND]);
 
-        $this->actionFactory
+        $this->handlerFactory
             ->expects($this->once())
             ->method('create')
             ->with('route_error_handler', [])
@@ -117,7 +117,7 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::METHOD_NOT_ALLOWED, ['GET', 'POST']]);
 
-        $this->actionFactory
+        $this->handlerFactory
             ->expects($this->once())
             ->method('create')
             ->with('method_error_handler', ['allowedMethods' => ['GET', 'POST']])
@@ -140,13 +140,13 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::FOUND, 'fixture_action_type', ['param1' => 'value1', 'param2' => 'value2']]);
 
-        $this->actionFactory
+        $this->handlerFactory
             ->expects($this->at(0))
             ->method('create')
             ->with('fixture_action_type', ['param1' => 'value1', 'param2' => 'value2'])
             ->willThrowException(new \UnexpectedValueException());
 
-        $this->actionFactory
+        $this->handlerFactory
             ->expects($this->at(1))
             ->method('create')
             ->with('exception_handler', $this->logicalAnd(
@@ -173,7 +173,7 @@ class FrontControllerTest extends TestCase
             ->with('TEST', '/resource')
             ->willReturn([Dispatcher::FOUND, 'fixture_action_type', ['param1' => 'value1', 'param2' => 'value2']]);
 
-        $this->actionFactory
+        $this->handlerFactory
             ->expects($this->once())
             ->method('create')
             ->with('fixture_action_type', ['param1' => 'value1', 'param2' => 'value2'])

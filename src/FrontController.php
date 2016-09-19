@@ -13,9 +13,9 @@ class FrontController
     protected $dispatcher;
 
     /**
-     * @var ActionFactory
+     * @var HandlerFactory
      */
-    protected $actionFactory;
+    protected $handlerFactory;
 
     /**
      * @var string
@@ -36,27 +36,27 @@ class FrontController
      * Inject dependencies
      *
      * @param Dispatcher $dispatcher
-     * @param ActionFactory $actionFactory
+     * @param HandlerFactory $handlerFactory
      * @param string $routeErrorHandler Class to handle not found resources
      * @param string $methodErrorHandler Class to handle not allowed methods
      * @param string $exceptionHandler Class to handle uncaught exceptions
      */
     public function __construct(
         Dispatcher $dispatcher,
-        ActionFactory $actionFactory,
+        HandlerFactory $handlerFactory,
         $routeErrorHandler,
         $methodErrorHandler,
         $exceptionHandler
     ) {
         $this->dispatcher = $dispatcher;
-        $this->actionFactory = $actionFactory;
+        $this->handlerFactory = $handlerFactory;
         $this->routeErrorHandler = $routeErrorHandler;
         $this->methodErrorHandler = $methodErrorHandler;
         $this->exceptionHandler = $exceptionHandler;
     }
 
     /**
-     * Delegate request handling to the respective action and return its execution result
+     * Delegate request processing to the respective handler and return its execution result
      *
      * @param ServerRequestInterface $request
      * @param ResponseInterface $response
@@ -84,10 +84,10 @@ class FrontController
                 break;
         }
         try {
-            $handler = $this->actionFactory->create($handlerClass, $handlerArgs);
+            $handler = $this->handlerFactory->create($handlerClass, $handlerArgs);
             $response = $handler->execute($response);
         } catch (\Exception $e) {
-            $handler = $this->actionFactory->create($this->exceptionHandler, ['exception' => $e]);
+            $handler = $this->handlerFactory->create($this->exceptionHandler, ['exception' => $e]);
             $response = $handler->execute($response);
         }
         return $response;

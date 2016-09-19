@@ -2,9 +2,9 @@
 namespace Upscale\HttpServerEngine\ErrorHandler;
 
 use Psr\Http\Message\ResponseInterface;
-use Upscale\HttpServerEngine\ActionInterface;
+use Upscale\HttpServerEngine\HandlerInterface;
 
-class MethodNotAllowed implements ActionInterface
+class MethodNotAllowed implements HandlerInterface
 {
     /**
      * @var array
